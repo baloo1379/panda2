@@ -5,13 +5,17 @@ Route::set('', function(){
 });
 
 Route::set('upload', function (){
-	if(!Upload::receiveFile()) {
-		Upload::createView('UploadError');
+	if(!Upload::receiveFile()[0]) {
+		Upload::createView('UploadError', array('data' => Upload::receiveFile()[1]));
 	}
 	else {
-		//Upload::prepareTable();
 		Upload::prepareTable();
 		Upload::populateTable();
-		Upload::createView('Upload', array('data' => 'ok'));
+		header('Location:'.BASEDIR.'present');
+		//Upload::createView('Upload', array('data' => 'ok'));
 	}
+});
+
+Route::set('present', function(){
+	Present::createView('Present');
 });

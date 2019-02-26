@@ -9,3 +9,16 @@
 	<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 	<title><?php echo SITE_NAME ?></title>
 </head>
+<body>
+<section class="hero is-primary is-bold">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title">
+                Zadanie 2
+            </h1>
+            <h2 class="subtitle">
+                Generowanie wykresu z pliku .csv
+            </h2>
+        </div>
+    </div>
+</section>

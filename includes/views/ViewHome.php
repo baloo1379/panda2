@@ -1,17 +1,4 @@
 <?php require_once 'ViewHeaderPart.php' ?>
-<body>
-<section class="hero is-primary is-bold">
-    <div class="hero-body">
-        <div class="container">
-            <h1 class="title">
-                Zadanie 2
-            </h1>
-            <h2 class="subtitle">
-                Generowanie wykresu z pliku .csv
-            </h2>
-        </div>
-    </div>
-</section>
 <section class="section has-background-light" style="height: calc(100vh - 305px);">
     <div class="columns">
         <div class="column is-half is-offset-one-quarter has-background-white">
@@ -23,7 +10,7 @@
                 <div class="field is-grouped">
                     <div class="control file">
                         <label class="file-label">
-                            <input class="file-input" type="file" name="file" id="file">
+                            <input class="file-input" type="file" name="file" id="file" required>
                             <span class="file-cta">
                               <span class="file-icon">
                                 <i class="fas fa-upload"></i>
@@ -34,6 +21,7 @@
                             </span>
                         </label>
                     </div>
+
                     <div class="control">
                         <input type="submit" class="button is-info">
                     </div>
@@ -44,18 +32,14 @@
     </div>
 
 </section>
-<footer class="footer">
-
-</footer>
-
-
 <script>
-let file = document.getElementById("file");
-file.onchange = function() {
-    if(file.files.length > 0) {
-        document.getElementById('filename').innerHTML = file.files[0].name;
-    }
-};
+    (function () {
+        let file = document.getElementById("file");
+        file.onchange = function() {
+            if(file.files.length > 0) {
+                document.getElementById('filename').innerHTML = file.files[0].name;
+            }
+        };
+    })();
 </script>
-</body>
-</html>
+<?php require_once 'ViewFooterPart.php' ?>

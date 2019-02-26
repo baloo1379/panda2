@@ -22,21 +22,25 @@ class Upload extends Controller
 
 	private static $lastHeader;
 
-	public static function receiveFile() {
+	public static function getLastTableName() {
+		return self::$lastTableName;
+	}
 
+	public static function receiveFile() {
 		try {
 			$file = Request::file( 'file' );
 			$destination = getcwd().'\\files\\'.basename($file['name']);
 			if(!move_uploaded_file($file['tmp_name'], $destination)) {
-				return false;
+				return array(false, 'File arleady');
 			}
 			self::$lastFileDir = $destination;
 			self::$lastTableName = explode('.', $file['name'])[0];
-			return true;
+			//self::$lastTableName = $chartName;
+			return array(true);
 		}
 		catch (Exception $e)
 		{
-			return false;
+			return array(false, $e->getMessage());
 		}
 
 	}
@@ -68,7 +72,7 @@ class Upload extends Controller
 		$query .= ") VALUES ";
 
 		$file = fopen(self::$lastFileDir, 'r');
-		$read = fgets($file, filesize(self::$lastFileDir));
+		fgets($file, filesize(self::$lastFileDir));
 		while(!feof($file)) {
 			$line = fgetcsv($file);
 			if(!empty($line)) {
