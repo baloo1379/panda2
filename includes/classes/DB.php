@@ -8,10 +8,10 @@
 
 class DB
 {
-	private static $host = 'localhost';
-	private static $dbName = 'panda2';
-	private static $username = 'bartix997';
-	private static $password = 'zxszxs321';
+	public static $host = 'localhost';
+	public static $dbName = 'panda2';
+	protected static $username = 'bartix997';
+	protected static $password = 'zxszxs321';
 
 	private static function connect() {
 		try {
@@ -24,12 +24,15 @@ class DB
 		}
 	}
 
-	public static function query($query, $params=array()) {
+	public static function query($query, $params=array(), $fetch=PDO::FETCH_NUM) {
 		$statement = self::connect()->prepare($query);
 		$statement->execute($params);
-		if (explode(' ', $query)[0] == 'SELECT') {
-			$data = $statement->fetchAll();
-			return $data;
+		if (explode(' ', $query)[0] == 'SELECT' || explode(' ', $query)[0] == 'SHOW' ) {
+			if($statement) {
+				$data = $statement->fetchAll($fetch);
+				return $data;
+			}
+
 		}
 	}
 }

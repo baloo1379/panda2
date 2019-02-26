@@ -21,7 +21,6 @@
                             </span>
                         </label>
                     </div>
-
                     <div class="control">
                         <input type="submit" class="button is-info">
                     </div>

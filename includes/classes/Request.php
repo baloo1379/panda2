@@ -20,5 +20,6 @@ class Request
 			}
 			else throw new Exception('Upload error');
 		}
+		else throw new Exception('No file provided');
 	}
 }

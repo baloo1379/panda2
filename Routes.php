@@ -9,13 +9,16 @@ Route::set('upload', function (){
 		Upload::createView('UploadError', array('data' => Upload::receiveFile()[1]));
 	}
 	else {
+		if(!Upload::validateFile()) {
+			Upload::createView('UploadError', array('data' => Upload::validateFile()[1]));
+		}
 		Upload::prepareTable();
 		Upload::populateTable();
-		header('Location:'.BASEDIR.'present');
+		header('Location:'.BASEDIR.'present?table='.Upload::getLastTableName());
 		//Upload::createView('Upload', array('data' => 'ok'));
 	}
 });
 
 Route::set('present', function(){
-	Present::createView('Present');
+	Present::createView('Present', array('array' => Present::numbers($_GET['table']), 'table' => $_GET['table']));
 });

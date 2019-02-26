@@ -14,6 +14,18 @@ function arrayToSQL($data) {
 	return $result;
 }
 
+function removeSpaces($data) {
+	return preg_replace('/\s+/', '', $data);
+}
+
+function validMySQL($var) {
+$var=stripslashes($var);
+$var=htmlentities($var);
+$var=strip_tags($var);
+$var=removeSpaces($var);
+return $var;
+}
+
 class Upload extends Controller
 {
 	private static $lastFileDir;
@@ -29,13 +41,15 @@ class Upload extends Controller
 	public static function receiveFile() {
 		try {
 			$file = Request::file( 'file' );
-			$destination = getcwd().'\\files\\'.basename($file['name']);
+			$fileName = strtolower(validMySQL($file['name']));
+			$tableName = explode('.', $fileName)[0];
+			$destination = getcwd().'\\files\\'.basename($fileName);
 			if(!move_uploaded_file($file['tmp_name'], $destination)) {
-				return array(false, 'File arleady');
+				return array(false, 'Move error');
 			}
 			self::$lastFileDir = $destination;
-			self::$lastTableName = explode('.', $file['name'])[0];
-			//self::$lastTableName = $chartName;
+			self::$lastTableName = $tableName;
+
 			return array(true);
 		}
 		catch (Exception $e)
@@ -45,13 +59,41 @@ class Upload extends Controller
 
 	}
 
-	public static function prepareTable() {
+	public static function validateFile() {
+		$tableName = self::$lastTableName ;
+		$query = "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA='panda2' AND TABLE_NAME LIKE '%$tableName%'";
+		//echo $query.'<br>';
+		$result = DB::query($query)[0];
+		if($result>=1) {
+			$tmpArray = explode('_', $tableName);
+			if(!is_int($tmpArray[count($tmpArray)-1])) {
+				$tableName = implode('_',$tmpArray).'_'.$result[0];
+			}
+			else {
+				$tmpArray[count($tmpArray)-1]++;
+				$tableName = implode('_',$tmpArray);
+			}
+		}
+		self::$lastTableName = $tableName;
 		$file = fopen(self::$lastFileDir, 'r');
 		$read = fgets($file, filesize(self::$lastFileDir));
 		fclose($file);
 		$header = explode(',', $read);
+		//print_r($header);
+		if(!in_array('id', $header) && !in_array('country ', $header)) {
+			unlink(self::$lastFileDir);
+			echo 'error';
+			return array(false, 'Dane nie zawierają id lub kraju');
+		}
+
 		self::$lastHeader = $header;
-		$query = "CREATE TABLE ".self::$lastTableName." ( $header[0] INT NOT NULL AUTO_INCREMENT, ";
+		return array(true);
+	}
+
+	public static function prepareTable() {
+		$header = self::$lastHeader;
+		$query = "CREATE TABLE `".self::$lastTableName."` ( $header[0] INT NOT NULL AUTO_INCREMENT, ";
+		//echo $header;
 		for ($i=1; $i<count($header); $i++) {
 			$query .= "$header[$i] VARCHAR(255) NOT NULL, ";
 		}
@@ -62,7 +104,7 @@ class Upload extends Controller
 	}
 
 	public static function populateTable() {
-		$query = "INSERT INTO ".self::$lastTableName." (";
+		$query = "INSERT INTO `".self::$lastTableName."` (";
 		for ($i=0; $i<count(self::$lastHeader); $i++) {
 			$query .= self::$lastHeader[$i];
 			if($i<count(self::$lastHeader)-1) {
@@ -70,7 +112,7 @@ class Upload extends Controller
 			}
 		}
 		$query .= ") VALUES ";
-
+		echo $query;
 		$file = fopen(self::$lastFileDir, 'r');
 		fgets($file, filesize(self::$lastFileDir));
 		while(!feof($file)) {
@@ -81,7 +123,7 @@ class Upload extends Controller
 		}
 		$query = substr($query, 0, strlen($query)-2);
 		fclose($file);
-
+		unlink(self::$lastFileDir);
 		//echo $query;
 		DB::query($query);
 	}

@@ -8,8 +8,18 @@
 
 class Present extends Controller
 {
-	public static function numbers() {
-		$tableName = Upload::getLastTableName();
-		$query = "SELECT Count(*) AS 'number', country FROM $tableName GROUP BY country ORDER BY number DESC";
+	public static function numbers($tableName) {
+		$query = "SELECT Count(*) AS 'number', country FROM `$tableName` GROUP BY country ORDER BY number DESC";
+		$result = DB::query($query, $params=array(), $fetch=PDO::FETCH_ASSOC);
+		$labels = array();
+		$series = array();
+		foreach ($result as $double) {
+			$number = $double['number'];
+			$country = $double['country'];
+			array_push($labels, $country);
+			array_push($series, $number);
+		}
+
+		return array('labels' => $labels, 'series' => $series);
 	}
 }
