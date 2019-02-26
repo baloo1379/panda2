@@ -1,17 +1,61 @@
-<!doctype html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><?php echo SITE_NAME ?></title>
-</head>
+<?php require_once 'ViewHeaderPart.php' ?>
 <body>
-<h1>Home</h1>
-<form action="upload" method="post" enctype="multipart/form-data">
-    <input type="file" name="file">
-    <input type="submit">
-</form>
+<section class="hero is-primary is-bold">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title">
+                Zadanie 2
+            </h1>
+            <h2 class="subtitle">
+                Generowanie wykresu z pliku .csv
+            </h2>
+        </div>
+    </div>
+</section>
+<section class="section has-background-light" style="height: calc(100vh - 305px);">
+    <div class="columns">
+        <div class="column is-half is-offset-one-quarter has-background-white">
+            <div class="content">
+                <p>Wybierz plik <code>.csv</code> na podstawie którego chcesz stworzyć wykres.</p>
+            </div>
+
+            <form action="upload" method="post" enctype="multipart/form-data">
+                <div class="field is-grouped">
+                    <div class="control file">
+                        <label class="file-label">
+                            <input class="file-input" type="file" name="file" id="file">
+                            <span class="file-cta">
+                              <span class="file-icon">
+                                <i class="fas fa-upload"></i>
+                              </span>
+                              <span class="file-label" id="filename">
+                                Wybierz plik
+                              </span>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="control">
+                        <input type="submit" class="button is-info">
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+</section>
+<footer class="footer">
+
+</footer>
+
+
+<script>
+let file = document.getElementById("file");
+file.onchange = function() {
+    if(file.files.length > 0) {
+        document.getElementById('filename').innerHTML = file.files[0].name;
+    }
+};
+</script>
 </body>
 </html>

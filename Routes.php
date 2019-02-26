@@ -10,6 +10,8 @@ Route::set('upload', function (){
 	}
 	else {
 		//Upload::prepareTable();
-		Upload::createView('Upload', array('data' => Upload::prepareTable()));
+		Upload::prepareTable();
+		Upload::populateTable();
+		Upload::createView('Upload', array('data' => 'ok'));
 	}
 });

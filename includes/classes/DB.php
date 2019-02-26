@@ -22,7 +22,6 @@ class DB
 		catch (PDOException $e) {
 			echo "Database connection error<br>".$e->getMessage();
 		}
-
 	}
 
 	public static function query($query, $params=array()) {

@@ -1,14 +1,26 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: barte
- * Date: 26.02.2019
- * Time: 14:44
- */
+
+function arrayToSQL($data) {
+	$result = '(';
+	for ($i=0; $i<count($data); $i++) {
+		$result .= '\''.addslashes($data[$i]).'\'';
+		if($i<count($data)-1) {
+			$result .= ', ';
+		}
+		else {
+			$result .= '), ';
+		}
+	}
+	return $result;
+}
 
 class Upload extends Controller
 {
 	private static $lastFileDir;
+
+	private static $lastTableName;
+
+	private static $lastHeader;
 
 	public static function receiveFile() {
 
@@ -19,6 +31,7 @@ class Upload extends Controller
 				return false;
 			}
 			self::$lastFileDir = $destination;
+			self::$lastTableName = explode('.', $file['name'])[0];
 			return true;
 		}
 		catch (Exception $e)
@@ -30,8 +43,42 @@ class Upload extends Controller
 
 	public static function prepareTable() {
 		$file = fopen(self::$lastFileDir, 'r');
-		$read = fread($file, filesize(self::$lastFileDir));
+		$read = fgets($file, filesize(self::$lastFileDir));
 		fclose($file);
-		return explode('\n', $read)[0];
+		$header = explode(',', $read);
+		self::$lastHeader = $header;
+		$query = "CREATE TABLE ".self::$lastTableName." ( $header[0] INT NOT NULL AUTO_INCREMENT, ";
+		for ($i=1; $i<count($header); $i++) {
+			$query .= "$header[$i] VARCHAR(255) NOT NULL, ";
+		}
+		$query .= "PRIMARY KEY (id))";
+
+		//return $query;
+		DB::query($query);
+	}
+
+	public static function populateTable() {
+		$query = "INSERT INTO ".self::$lastTableName." (";
+		for ($i=0; $i<count(self::$lastHeader); $i++) {
+			$query .= self::$lastHeader[$i];
+			if($i<count(self::$lastHeader)-1) {
+				$query .= ', ';
+			}
+		}
+		$query .= ") VALUES ";
+
+		$file = fopen(self::$lastFileDir, 'r');
+		$read = fgets($file, filesize(self::$lastFileDir));
+		while(!feof($file)) {
+			$line = fgetcsv($file);
+			if(!empty($line)) {
+				$query .= arrayToSQL($line);
+			}
+		}
+		$query = substr($query, 0, strlen($query)-2);
+		fclose($file);
+
+		//echo $query;
+		DB::query($query);
 	}
 }
