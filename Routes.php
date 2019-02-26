@@ -5,20 +5,33 @@ Route::set('', function(){
 });
 
 Route::set('upload', function (){
-	if(!Upload::receiveFile()[0]) {
-		Upload::createView('UploadError', array('data' => Upload::receiveFile()[1]));
+	$recv = Upload::receiveFile();
+	if(!$recv[0]) {
+		Upload::createView('Error', array('data' => $recv[1]));
 	}
 	else {
-		if(!Upload::validateFile()) {
-			Upload::createView('UploadError', array('data' => Upload::validateFile()[1]));
+		$result = Upload::validateFile();
+		if(!$result[0]) {
+			Upload::createView('Error', array('data' => $result[1]));
 		}
-		Upload::prepareTable();
-		Upload::populateTable();
-		header('Location:'.BASEDIR.'present?table='.Upload::getLastTableName());
-		//Upload::createView('Upload', array('data' => 'ok'));
+		else {
+			Upload::prepareTable();
+			Upload::populateTable();
+			header( 'Location:' . BASEDIR . 'present?table=' . Upload::getLastTableName() );
+			//Upload::createView('Upload', array('data' => 'ok'));
+		}
 	}
 });
 
 Route::set('present', function(){
-	Present::createView('Present', array('array' => Present::numbers($_GET['table']), 'table' => $_GET['table']));
+	if(!isset($_GET['table'])) {
+		header('Location:'.BASEDIR);
+	}
+	$numbers = Present::numbers($_GET['table']);
+	if($numbers[0]) {
+		Present::createView('Present', array('array' => $numbers));
+	}
+	else {
+		Present::createView('Error', array('data' => $numbers[1]));
+	}
 });

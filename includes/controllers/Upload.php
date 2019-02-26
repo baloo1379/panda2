@@ -22,7 +22,7 @@ function validMySQL($var) {
 $var=stripslashes($var);
 $var=htmlentities($var);
 $var=strip_tags($var);
-$var=removeSpaces($var);
+//$var=removeSpaces($var);
 return $var;
 }
 
@@ -41,7 +41,7 @@ class Upload extends Controller
 	public static function receiveFile() {
 		try {
 			$file = Request::file( 'file' );
-			$fileName = strtolower(validMySQL($file['name']));
+			$fileName = strtolower(validMySQL(removeSpaces($file['name'])));
 			$tableName = explode('.', $fileName)[0];
 			$destination = getcwd().'\\files\\'.basename($fileName);
 			if(!move_uploaded_file($file['tmp_name'], $destination)) {
@@ -76,18 +76,16 @@ class Upload extends Controller
 		}
 		self::$lastTableName = $tableName;
 		$file = fopen(self::$lastFileDir, 'r');
-		$read = fgets($file, filesize(self::$lastFileDir));
+		$read = validMySQL(removeSpaces(fgets($file)));
 		fclose($file);
 		$header = explode(',', $read);
-		//print_r($header);
-		if(!in_array('id', $header) && !in_array('country ', $header)) {
-			unlink(self::$lastFileDir);
-			echo 'error';
-			return array(false, 'Dane nie zawierają id lub kraju');
-		}
-
 		self::$lastHeader = $header;
-		return array(true);
+		if(in_array('country', $header)) {
+			return array(true);
+		}
+		else {
+			return array(false, 'Dane nie zawierają informacji o kraju');
+		}
 	}
 
 	public static function prepareTable() {
